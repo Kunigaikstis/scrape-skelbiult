@@ -26,5 +26,8 @@ In case of *_unsubscribing_* (aka deleting the SQLite `.db` file), send your bot
 # Running the scraper
 `make start`
 
+# Authors notes
+This repo was created as a fairly quick prototype without the intention of making it into a generic Telegram bot. I run it on my own machine but it could easily be configured to run on a _Cloud Function_ somewhere, given that you switch out SQLite for a cloud-hosted database (like Google Firestore).
+
 # License
 MIT License.
