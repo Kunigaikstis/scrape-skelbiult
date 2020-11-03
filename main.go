@@ -10,6 +10,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/joho/godotenv"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 
 	"github.com/gocolly/colly/v2"
@@ -17,17 +19,22 @@ import (
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	searchUrl := os.Getenv("SKELBIU_LT_SEARCH_RESULTS_URL")
+	telegramBotToken := os.Getenv("TELEGRAM_BOT_TOKEN")
+
 	db := initDB()
-	err := migrateDB(db)
+	err = migrateDB(db)
 	panicOnError(err)
 
 	listingRepo := NewListingRepository(db)
 	chatRepo := NewChatRepository(db)
 
 	listingChan := make(chan Listing)
-
-	searchUrl := os.Getenv("SKELBIU_LT_SEARCH_RESULTS_URL")
-	telegramBotToken := os.Getenv("TELEGRAM_BOT_TOKEN")
 
 	bot, err := tgbotapi.NewBotAPI(telegramBotToken)
 	panicOnError(err)
@@ -37,12 +44,10 @@ func main() {
 	})
 	panicOnError(err)
 
-	startScraping(searchUrl, listingRepo, listingChan)
-
 	for {
 		select {
-		case <-time.After(time.Minute * 10):
-			startScraping(searchUrl, listingRepo, listingChan)
+		case <-time.After(time.Second * 10):
+			startScraping(searchUrl, listingChan)
 		case update := <-updatesChan:
 			saveChat(update, chatRepo)
 		case listing := <-listingChan:
@@ -117,7 +122,7 @@ func saveChat(update tgbotapi.Update, chatRepo *ChatRepository) {
 	}
 }
 
-// Initializes the db instances
+// Initializes the db instance
 func initDB() *sql.DB {
 	db, err := sql.Open("sqlite3", "./listings.db")
 	panicOnError(err)
@@ -127,7 +132,6 @@ func initDB() *sql.DB {
 
 // Applies migrations to the db
 func migrateDB(db *sql.DB) error {
-
 	file, err := ioutil.ReadFile("./init.sql")
 
 	if err != nil {
@@ -147,7 +151,7 @@ func migrateDB(db *sql.DB) error {
 }
 
 // Finds new listings and pushes them into the listing channel
-func startScraping(searchUrl string, listingRepo *ListingRepository, listingChan chan<- Listing) {
+func startScraping(searchUrl string, listingChan chan<- Listing) {
 	c := colly.NewCollector(
 		colly.AllowedDomains("skelbiu.lt", "aruodas.lt", "www.skelbiu.lt", "www.aruodas.lt"),
 	)
