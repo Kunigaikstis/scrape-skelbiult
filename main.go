@@ -18,18 +18,25 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func main() {
+func loadEnvFile() {
 	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+	panicOnError(err)
+}
 
+func setupDB() *sql.DB {
+	db := initDB()
+	err := migrateDB(db)
+	panicOnError(err)
+
+	return db
+}
+
+func main() {
+	loadEnvFile()
 	searchUrl := os.Getenv("SKELBIU_LT_SEARCH_RESULTS_URL")
 	telegramBotToken := os.Getenv("TELEGRAM_BOT_TOKEN")
 
-	db := initDB()
-	err = migrateDB(db)
-	panicOnError(err)
+	db := setupDB()
 
 	listingRepo := NewListingRepository(db)
 	chatRepo := NewChatRepository(db)
@@ -62,13 +69,11 @@ func main() {
 				}
 
 				// Print link
-				fmt.Printf("New link found: %s -> %s\n", listing.Id, listing.Url)
+				fmt.Printf("New link found: %v -> %s\n", listing.Id, listing.Url)
 
 				err = sendListing(listing, chatRepo, bot)
 
-				if err != nil {
-					log.Println(err)
-				}
+				panicOnError(err)
 			}
 		}
 	}
@@ -173,7 +178,7 @@ func startScraping(searchUrl string, listingChan chan<- Listing) {
 			Url: absoluteUrl,
 		}
 
-		listingChan <- listing
+		go func(listingChat chan<- Listing) { listingChan <- listing }(listingChan)
 	})
 
 	// Start scraping
