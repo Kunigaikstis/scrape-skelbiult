@@ -51,6 +51,8 @@ func main() {
 	})
 	panicOnError(err)
 
+	startScraping(searchUrl, listingChan)
+
 	for {
 		select {
 		case <-time.After(time.Minute * 10):
@@ -58,6 +60,14 @@ func main() {
 		case update := <-updatesChan:
 			saveChat(update, chatRepo)
 		case listing := <-listingChan:
+			if chats, err := chatRepo.GetAll(); len(chats) == 0 || err != nil {
+				if err != nil {
+					log.Println(err)
+				}
+
+				continue
+			}
+
 			l, err := listingRepo.GetById(listing.Id)
 
 			if err != nil && l.Id == 0 {
