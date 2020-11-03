@@ -53,7 +53,7 @@ func main() {
 
 	for {
 		select {
-		case <-time.After(time.Second * 10):
+		case <-time.After(time.Minute * 10):
 			startScraping(searchUrl, listingChan)
 		case update := <-updatesChan:
 			saveChat(update, chatRepo)
