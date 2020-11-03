@@ -17,7 +17,7 @@ An example can be found in `/examples/.env`.
 Refine your search on https://www.skelbiu.lt and save the resulting URL into the `SKELBIU_LT_SEARCH_RESULTS_URL` `.env` variable.
 
 ### Telegram
-Create a Telegram BOT using the [official documentation](https://core.telegram.org/bots#6-botfather) and save the API token into `TELEGRAM_BOT_TOKEN` `.env` variable.
+Create a Telegram BOT using the [official documentation](https://core.telegram.org/bots#6-botfather) and save the API token into the `TELEGRAM_BOT_TOKEN` `.env` variable.
 
 # Running the scraper
 `make start`
