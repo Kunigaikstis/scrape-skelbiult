@@ -1,4 +1,4 @@
-Scrapes www.skelbiu.lt for new listings and sends them to you via Telegram.
+Scrapes www.skelbiu.lt every 10 minutes for new listings and sends them to you via Telegram.
 
 # Setup
 1. Clone the repo: `git clone https://github.com/Kunigaikstis/scrape-skelbiult.git`.
@@ -18,6 +18,10 @@ Refine your search on https://www.skelbiu.lt and save the resulting URL into the
 
 ### Telegram
 Create a Telegram BOT using the [official documentation](https://core.telegram.org/bots#6-botfather) and save the API token into the `TELEGRAM_BOT_TOKEN` `.env` variable.
+
+## Important
+You'll need to subscribe to your newly created bot after running the scraper. This can be done by finding the BOT through the nickname you assigned to it and sending it a message.
+In case of *_unsubscribing_* (aka deleting the SQLite `.db` file), send your bot a new message once the scraper is running.
 
 # Running the scraper
 `make start`
