@@ -2,7 +2,7 @@ include .env
 
 ## start: Starts the scraper until interrupted.
 start:
-	go run main.go repository.go
+	go build -o ./bin/main ./cmd/console/ && ./bin/main
 
 ## install: Install missing dependencies. Runs `go get` internally.
 install:
