@@ -12,13 +12,15 @@ type Scraper struct {
 	collector *colly.Collector
 }
 
-func NewScraper(collector *colly.Collector) *Scraper {
-	return &Scraper{collector: collector}
+func NewScraper(allowedDomains ...string) *Scraper {
+	c := colly.NewCollector(
+		colly.AllowedDomains(allowedDomains...),
+	)
+	return &Scraper{collector: c}
 }
 
 func (s *Scraper) GetListings(url string) []Ad {
 	detailCollector := s.collector.Clone()
-
 	// On every a element which has href attribute call callback
 	s.collector.OnHTML("li.simpleAds > a[href]", func(e *colly.HTMLElement) {
 		link := e.Attr("href")

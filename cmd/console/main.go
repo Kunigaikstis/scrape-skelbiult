@@ -16,7 +16,6 @@ import (
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 
-	"github.com/gocolly/colly/v2"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -39,13 +38,8 @@ func main() {
 	telegramBotToken := os.Getenv("TELEGRAM_BOT_TOKEN")
 
 	db := setupDB()
-
-	c := colly.NewCollector(
-		colly.AllowedDomains("skelbiu.lt", "aruodas.lt", "www.skelbiu.lt", "www.aruodas.lt"),
-	)
-	s := listing.NewScraper(c)
 	listingRepo := listing.NewStorage(db)
-	listingService := listing.NewService(listingRepo, s)
+	listingService := listing.NewService(listingRepo)
 	chatRepo := message.NewStorage(db)
 	bot, err := tgbotapi.NewBotAPI(telegramBotToken)
 	panicOnError(err)
@@ -60,7 +54,8 @@ func main() {
 		select {
 		case <-time.After(time.Minute * 10):
 			log.Print("checking for new ads....")
-			adsToDispatch, err := listingService.GetNewListings(searchUrl)
+			s := listing.NewScraper("skelbiu.lt", "aruodas.lt", "www.skelbiu.lt", "www.aruodas.lt")
+			adsToDispatch, err := listingService.GetNewListings(searchUrl, s)
 			panicOnError(err)
 			log.Printf("found %v new ads", len(adsToDispatch))
 

@@ -1,8 +1,7 @@
 package listing
 
 type Service struct {
-	repo    Repository
-	scraper *Scraper
+	repo Repository
 }
 
 type Repository interface {
@@ -10,12 +9,12 @@ type Repository interface {
 	Add(listing Ad) error
 }
 
-func NewService(repo *Storage, scraper *Scraper) *Service {
-	return &Service{repo: repo, scraper: scraper}
+func NewService(repo *Storage) *Service {
+	return &Service{repo: repo}
 }
 
-func (s *Service) GetNewListings(searchUrl string) ([]Ad, error) {
-	latestAds := s.scraper.GetListings(searchUrl)
+func (s *Service) GetNewListings(searchUrl string, scraper *Scraper) ([]Ad, error) {
+	latestAds := scraper.GetListings(searchUrl)
 	newAds := make([]Ad, 0)
 
 	for _, newAd := range latestAds {
