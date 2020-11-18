@@ -2,7 +2,6 @@ FROM golang:latest AS builder
 
 # Set necessary environmet variables needed for our image
 ENV GO111MODULE=on \
-    CGO_ENABLED=0 \
     GOOS=linux \
     GOARCH=amd64
 
@@ -26,12 +25,21 @@ WORKDIR /dist
 # Copy binary from build to main folder
 RUN cp /build/main .
 
+# Need CA certificates
+# https://medium.com/on-docker/use-multi-stage-builds-to-inject-ca-certs-ad1e8f01de1b
+FROM alpine:latest as certs
+RUN apk --update add ca-certificates
+
 # Build a small image
-FROM scratch
+FROM ubuntu:latest
 
 ENV PATH=/bin
 
+COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=builder /dist/main /
+
+COPY ./.env /.env
+COPY ./init.sql /init.sql
 
 EXPOSE 8080
 
