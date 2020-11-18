@@ -58,7 +58,7 @@ func main() {
 
 	for {
 		select {
-		case <-time.After(time.Minute * 1):
+		case <-time.After(time.Minute * 10):
 			log.Print("checking for new ads....")
 			adsToDispatch, err := listingService.GetNewListings(searchUrl)
 			panicOnError(err)
