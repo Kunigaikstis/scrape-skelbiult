@@ -40,18 +40,3 @@ func TestSetupDb(t *testing.T) {
 		t.Error(err)
 	}
 }
-
-func TestStartScraping(t *testing.T) {
-	loadEnvFile()
-	searchUrl := os.Getenv("SKELBIU_LT_SEARCH_RESULTS_URL")
-
-	listingChan := make(chan Listing)
-
-	startScraping(searchUrl, listingChan)
-
-	listing := <-listingChan
-
-	if listing.Id == 0 {
-		t.Errorf("expected a valid listing, got %#v", listing)
-	}
-}
